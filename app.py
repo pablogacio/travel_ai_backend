@@ -1,25 +1,34 @@
+import os
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+import openai
 
+# Crear la app Flask
 app = Flask(__name__)
+CORS(app)  # Permite que la app Flutter (o cualquier frontend) pueda hacer peticiones
 
-# Ruta de prueba para verificar que el backend funciona
-@app.route("/")
-def home():
-    return jsonify({"message": "Backend activo"})
+# Obtener la API Key de OpenAI desde variable de entorno
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Ruta real de la API para tu plan de viaje
 @app.route("/plan", methods=["POST"])
-def plan_trip():
-    data = request.get_json()
-    destino = data.get("destino", "Mundo")
-    # Aquí iría tu lógica de OpenAI o cualquier procesamiento
-    plan = {
-        "dia_1": f"Actividades recomendadas en {destino} para el día 1",
-        "dia_2": f"Actividades recomendadas en {destino} para el día 2",
-        "dia_3": f"Actividades recomendadas en {destino} para el día 3"
-    }
-    return jsonify(plan)
+def generate_plan():
+    data = request.json
+    # Aquí recibimos por ejemplo {"destino": "Paris", "dias": 3}
+    destino = data.get("destino", "desconocido")
+    dias = data.get("dias", 1)
+
+    # Esto es un ejemplo de respuesta, en producción aquí iría la llamada a OpenAI
+    respuesta = f"Plan de viaje para {destino} durante {dias} día(s): actividades recomendadas."
+
+    # Si quisieras llamar a OpenAI, sería algo como:
+    # completion = openai.ChatCompletion.create(
+    #     model="gpt-4",
+    #     messages=[{"role": "user", "content": f"Plan de viaje para {destino} por {dias} días"}]
+    # )
+    # respuesta = completion.choices[0].message.content
+
+    return jsonify({"plan": respuesta})
 
 if __name__ == "__main__":
-    # Muy importante: host 0.0.0.0 y puerto 8080 para Railway
-    app.run(host="0.0.0.0", port=8080)
+    # IMPORTANTE: host 0.0.0.0 para que Railway pueda acceder
+    app.run(host="0.0.0.0", port=8080, debug=False)
