@@ -1,33 +1,35 @@
-import os
 from flask import Flask, request, jsonify
-import openai
 from flask_cors import CORS
+import os
+import openai
 
 app = Flask(__name__)
-CORS(app)  # permite llamadas desde Flutter/web
+CORS(app)  # Esto permite que tu app Flutter pueda llamar al backend sin CORS errors
 
-# API key desde variable de entorno
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# API Key de OpenAI desde variable de entorno
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/plan", methods=["POST"])
-def generate_plan():
-    data = request.json
-    prompt = data.get("prompt", "Escribe un plan de viaje")
-    
-    # Llamada a OpenAI
-    response = openai.Completion.create(
-        engine="text-davinci-003",
-        prompt=prompt,
-        max_tokens=200
-    )
-    
-    return jsonify({"plan": response.choices[0].text.strip()})
+def generar_plan():
+    # Obtener JSON del POST
+    data = request.get_json()
+    if not data or "prompt" not in data:
+        return jsonify({"error": "Falta el prompt"}), 400
 
-# Ruta raíz para pruebas
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({"status": "ok", "message": "Backend activo"})
+    prompt = data["prompt"]
+
+    # Generar respuesta (ejemplo, reemplaza con tu lógica)
+    try:
+        response = openai.Completion.create(
+            model="text-davinci-003",
+            prompt=prompt,
+            max_tokens=300
+        )
+        plan_text = response.choices[0].text.strip()
+        return jsonify({"plan": plan_text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    # Para pruebas locales solo, en Railway el servidor se levanta automáticamente
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
