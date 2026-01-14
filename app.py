@@ -1,46 +1,39 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Permite peticiones desde cualquier origen (tu app Flutter)
 
-@app.route('/')
+@app.route("/")
 def home():
-    return "API de Travel AI funcionando!"
-
-@app.route('/generar_itinerario', methods=['POST'])
-def generar_itinerario():
-    data = request.get_json()
-
-    # Recogemos los campos del formulario
-    destino = data.get('destino', 'desconocido')
-    dias = data.get('dias', 1)
-    presupuesto = data.get('presupuesto', 0)
-    tipo_viaje = data.get('tipo_viaje', 'normal')
-    coche_alquiler = data.get('coche_alquiler', 'no')
-    no_visitar = data.get('no_visitar', '')
-
-    # Creamos un itinerario de ejemplo (provisional)
-    itinerario = []
-    for i in range(1, int(dias)+1):
-        actividades = [f"Actividades recomendadas para {destino} en el día {i}"]
-        itinerario.append({
-            "dia": f"Día {i}",
-            "actividades": actividades
-        })
-
-    # Retornamos en JSON
     return jsonify({
+        "message": "Backend de Travel AI funcionando correctamente!"
+    })
+
+@app.route("/generar-itinerario", methods=["POST"])
+def generar_itinerario():
+    data = request.json
+    destino = data.get("destino", "tu destino")
+    dias = int(data.get("dias", 1))
+    presupuesto = float(data.get("presupuesto", 0))
+    tipo_viaje = data.get("tipo_viaje", "Turismo")
+    coche_alquiler = data.get("coche_alquiler", "No")
+    exclusions = data.get("exclusiones", "")
+
+    itinerario = []
+    for i in range(1, dias+1):
+        itinerario.append(f"Día {i}: Actividades recomendadas para {destino} ({tipo_viaje})")
+    
+    response = {
         "destino": destino,
         "dias": dias,
         "presupuesto": presupuesto,
         "tipo_viaje": tipo_viaje,
         "coche_alquiler": coche_alquiler,
-        "no_visitar": no_visitar,
+        "exclusiones": exclusions,
         "itinerario": itinerario
-    })
+    }
+    return jsonify(response)
 
 if __name__ == "__main__":
     import os
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 5000))  # Railway asigna el puerto automáticamente
     app.run(host="0.0.0.0", port=port)
