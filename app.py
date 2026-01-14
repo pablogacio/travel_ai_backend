@@ -33,3 +33,4 @@ def generar_plan():
 if __name__ == "__main__":
     # Para pruebas locales solo, en Railway el servidor se levanta automáticamente
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+
