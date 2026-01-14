@@ -1,1 +1,1 @@
-flaskflask-corsopenai
+Flask==2.3.5openai==1.31.0flask-cors==3.1.1
