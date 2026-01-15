@@ -20,15 +20,15 @@ def generar_plan():
 
     prompt = data["prompt"]
 
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "Eres un asistente de viajes"},
-                {"role": "user", "content": prompt}
-            ]
-        )
-        plan = response.choices[0].message.content
-        return jsonify({"plan": plan})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "Eres un asistente de viajes"},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return jsonify({
+        "plan": response.choices[0].message.content
+    })
+
