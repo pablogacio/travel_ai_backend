@@ -18,22 +18,17 @@ def generar_plan():
     if not data or "prompt" not in data:
         return jsonify({"error": "No se proporcionó 'prompt'"}), 400
 
+    prompt = data["prompt"]
+
     try:
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Eres un asistente de viajes"},
-                {"role": "user", "content": data["prompt"]}
+                {"role": "user", "content": prompt}
             ]
         )
-
         plan = response.choices[0].message.content
         return jsonify({"plan": plan})
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-
-# 👇 SOLO para local, NO Railway
-if __name__ == "__main__":
-    app.run(debug=True)
